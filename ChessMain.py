@@ -20,7 +20,7 @@ def loadImages():
     #IMAGES['wp'] = p.image.load("images/wp.png")  näin pitää tehä kaikille kerran niin miten tehdä vaikka loopilla
     pieces = ['wp', 'bp', 'wR', 'wN', 'wB', 'wQ', 'wK', 'bR', 'bN', 'bB', 'bQ', 'bK', ]
     for piece in pieces:
-        IMAGES[piece] = p.transform.scale(p.image.load("images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
+        IMAGES[piece] = p.transform.scale(p.image.load("piece_pictures/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
     #Note Kuviin pääsee käsiksi 'IMAGES['wp']'
 
 #
@@ -60,7 +60,12 @@ def drawBoard(screen):
 
 # Piirtää hahmot laudan päälle nykyisestä gameState.board:sta
 def drawPieces(screen, board):
-    pass
+    for r in range(DIMENSION):
+        for c in range(DIMENSION):
+            piece = board[r][c]
+            if piece != "--":
+                screen.blit(IMAGES[piece], p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 if __name__ == "__main__":
     main()
+
