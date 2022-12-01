@@ -5,12 +5,13 @@
 import pygame as p
 #from Scripts import ChessEngine
 from ChessEngine import GameState
+from ChessEngine import Move
 import sys
 
 #sys.path.insert(0, GitHub_koodia/shakki_peli/Scripts/ChessEngine.py)
-WIDTH = HEIGHT = 512
+WIDTH = HEIGHT = 512    # pikseliä
 DIMENSION = 8            # lauta on 8x8
-SQ_SIZE = HEIGHT // DIMENSION
+SQ_SIZE = HEIGHT // DIMENSION  # koko lauta jaettuna 8 palaseen eli ruutuun
 MAX_FPS = 15 # for animation
 IMAGES = {}
 
@@ -32,22 +33,42 @@ def main():
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
     #gs = ChessEngine.GameState()
-    gs = GameState()
+    gameState = GameState()
+    moveFunction = Move()
     loadImages() # tee tämä vain kerran ettei kuvia ladata kokoajan, kun resurssi rankkaa
     running = True
+    squareSelected = () # alustetaan hiiren valinta, aluksi tyhjä tuple eli (rivi, kolumni)
+    playerClicks = [] # ylläpitää pelaajan painalluksia esim(kaksi tuplea: [(6,4), (4,4)])
 
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
-        drawGameState(screen, gs)
+            elif e.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos() #(x,y) koordinaatit hiirelle
+                column = location[0]//SQ_SIZE
+                row = location[1]//SQ_SIZE
+                if squareSelected == (row, column): # chekki painaako pelaaja kahdesti samaa ruutua
+                    squareSelected = ()  # poistaa painalluksen
+                    playerClicks = [] # poistaa pelaajan painalluksen
+                else:
+                    squareSelected = (row, column)
+                    playerClicks.append(squareSelected) # append ensimmäisen ja toisen painalluksen
+                if len(playerClicks) == 2: # eli toinen painallus, eli liikkuminen
+                    move = moveFunction(playerClicks[0], playerClicks[1], gameState.board)  
+                    print(moveFunction.getChessNotation())
+                    gameState.makeMove(move)  
+                    squareSelected = () #resetoi pelaajan klikkaus
+                    playerClicks = []
+
+        drawGameState(screen, gameState)
         clock.tick(MAX_FPS)
         p.display.flip()
 
 # Piirtää laudan grafiikat nykyisessä game statessa
-def drawGameState(screen, gs):
+def drawGameState(screen, gameState):
     drawBoard(screen) # piirtää neliöt laudalle
-    drawPieces(screen, gs.board) # piirtää hahmot laudalle
+    drawPieces(screen, gameState.board) # piirtää hahmot laudalle
     #uusi funktio tulevaisuudessa mikä highlaittaa hahmot tai ehdottaa sallitut liikkumiset
 
 # Piirtää neliöt laudalle
